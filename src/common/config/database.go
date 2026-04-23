@@ -27,5 +27,6 @@ func ConnectDatabase() {
 	DB = database
 	DB.AutoMigrate(
 		&models.User{},
+		&models.File{},
 	)
 }

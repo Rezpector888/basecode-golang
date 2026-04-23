@@ -28,6 +28,7 @@ func main() {
 
 	router.Use(gzip.Gzip(gzip.DefaultCompression))
 	router.Use(middlewares.SecureMiddleware())
+
 	//seeding() // Uncoment this for seeding
 
 	routes.SetupRoute(router)

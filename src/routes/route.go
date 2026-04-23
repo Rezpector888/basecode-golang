@@ -21,5 +21,6 @@ func SetupRoute(router *gin.Engine) {
 	auth.Use(middlewares.JwtAuthMiddleware())
 
 	UserRoutes(auth)
+	StorageRoute(auth)
 
 }
