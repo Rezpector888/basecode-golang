@@ -1,20 +1,15 @@
 package main
 
 import (
-	"context"
 	"fmt"
-	"net/http"
+	"net"
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"example.com/src/common/config"
-	"example.com/src/common/middlewares"
-	"example.com/src/models/seeders"
-	"example.com/src/routes"
-	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
+	"google.golang.org/grpc"
 )
 
 func main() {
@@ -22,51 +17,32 @@ func main() {
 
 	gin.SetMode(config.AppConfig.AppMode)
 
-	router := gin.Default()
-
 	config.ConnectDatabase()
 
-	router.Use(gzip.Gzip(gzip.DefaultCompression))
-	router.Use(middlewares.SecureMiddleware())
+	addr := fmt.Sprintf(":%s", config.AppConfig.GrpcPort)
+	listen, err := net.Listen("tcp", addr)
+	if err != nil {
+		config.LogMessage("ERROR", "GRPC error running: "+err.Error())
+	}
+	serverGrpc := grpc.NewServer()
 
-	//seeding() // Uncoment this for seeding
+	config.LogMessage("INFO", "GRPC is running on port "+config.AppConfig.GrpcPort)
 
-	routes.SetupRoute(router)
-
-	addr := fmt.Sprintf(":%s", config.AppConfig.Port)
-	server := &http.Server{
-		Addr:    addr,
-		Handler: router,
+	if err := serverGrpc.Serve(listen); err != nil {
+		config.LogMessage("ERROR", "GRPC error running: "+err.Error())
 	}
 
-	config.LogMessage("INFO", "Server is running on port "+config.AppConfig.Port)
-
-	go func() {
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			config.LogMessage("ERROR", "Server error: "+err.Error())
-		}
-	}()
-
-	waitForShutdown(server)
+	waitForShutdown(serverGrpc)
 }
 
-func waitForShutdown(server *http.Server) {
+func waitForShutdown(server *grpc.Server) {
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
 	<-stop
 
 	config.LogMessage("INFO", "Shutting down server...")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+	server.Stop()
 
-	if err := server.Shutdown(ctx); err != nil {
-		config.LogMessage("ERROR", "Server forced to shutdown: "+err.Error())
-	} else {
-		config.LogMessage("INFO", "Server stopped successfully")
-	}
-}
-
-func seeding() {
-	seeders.SeedUser()
+	config.LogMessage("INFO", "Server stopped successfully")
 }

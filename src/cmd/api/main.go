@@ -30,7 +30,6 @@ func main() {
 	router.Use(middlewares.SecureMiddleware())
 
 	//seeding() // Uncoment this for seeding
-
 	routes.SetupRoute(router)
 
 	addr := fmt.Sprintf(":%s", config.AppConfig.Port)
