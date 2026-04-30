@@ -8,7 +8,7 @@ import (
 )
 
 func SeedUser() {
-	password := "Qwerty123*"
+	password := ""
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		config.LogMessage("ERROR", "Failed hash password: "+err.Error())

@@ -11,6 +11,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// @Summary Get all users
+// @Description get all users
+// @Tags users
+// @Accept json
+// @Produce json
+// @Success 200 {array} models.User
+// @Router /user/ [get]
 func FindAll(c *gin.Context) {
 
 	limitStr := c.DefaultQuery("limit", "10")

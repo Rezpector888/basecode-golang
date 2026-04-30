@@ -13,6 +13,15 @@ type LoginInput struct {
 	Password string `json:"password" binding:"required"`
 }
 
+// @Summary Login user
+// @Description Authenticate user and return JWT token
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param body body LoginInput true "Login payload"
+// @Success 200 {object} map[string]interface{email: string} "Success response"
+// @Failure 400 {object} map[string]interface{} "Bad request"
+// @Router /auth/login [post]
 func AuthController(c *gin.Context) {
 	var input LoginInput
 
@@ -40,6 +49,15 @@ func AuthController(c *gin.Context) {
 	utils.ResponseSuccess(c.Writer, 200, "success", response)
 }
 
+// @Summary Get current user
+// @Description Get logged in user info
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} map[string]interface{} "Success response"
+// @Failure 401 {object} map[string]interface{} "Unauthorized"
+// @Router /auth/me [get]
 func AuthMeController(c *gin.Context) {
 	userId, exist := c.Get("user_id")
 

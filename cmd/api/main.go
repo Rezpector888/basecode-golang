@@ -15,6 +15,10 @@ import (
 	"example.com/routes"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
+
+	_ "example.com/docs"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func main() {
@@ -24,6 +28,10 @@ func main() {
 
 	router := gin.Default()
 
+	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	router.GET("/docs", func(ctx *gin.Context) {
+		ctx.Redirect(302, "/docs/index.html")
+	})
 	config.ConnectDatabase()
 
 	router.Use(gzip.Gzip(gzip.DefaultCompression))
